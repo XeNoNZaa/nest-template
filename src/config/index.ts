@@ -1,11 +1,16 @@
 import * as dotenv from 'dotenv';
-// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-dotenv.config({ path: '.env.local' });
+// Load environment variables
+dotenv.config();
 
-import { typeOrmConfig } from './.loads/db.config';
 import packageJson from '../../package.json';
 
-console.table(Object.keys(process.env));
+import secretConfig from './conf.d/secret.conf';
+import loggerConfig from './conf.d/logger.conf';
+import typeOrmConfig from './conf.d/db.conf';
+import cacheConfig from './conf.d/cache.conf';
+import rabbitmqConfig from './conf.d/rabbitmq.conf';
+
+// console.table(Object.entries(process.env).map(([key, value]) => ({ key, value: value?.slice(0, 120) })));
 
 interface IPackageJson {
   name: string;
@@ -15,18 +20,26 @@ const typePackageJson = packageJson as unknown as IPackageJson;
 
 export interface IConfig {
   port: number;
-  database: typeof typeOrmConfig;
   app: {
     name: string;
     version: string;
   };
+  secret: typeof secretConfig;
+  database: typeof typeOrmConfig;
+  logger: typeof loggerConfig;
+  cache: typeof cacheConfig;
+  rabbitmq: typeof rabbitmqConfig;
 }
 
 export default (): IConfig => ({
   port: parseInt(process.env.PORT || '8001', 10),
-  database: typeOrmConfig,
   app: {
     name: typePackageJson.name,
     version: typePackageJson.version,
   },
+  secret: secretConfig,
+  logger: loggerConfig,
+  database: typeOrmConfig,
+  cache: cacheConfig,
+  rabbitmq: rabbitmqConfig,
 });
